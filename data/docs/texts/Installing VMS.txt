@@ -1,0 +1,15 @@
+This guide will teach you how to install our VMS (Video monitoring system)
+
+	1. Head to https://provision-isr.com/software-a-apps/ossia-vms
+	2. Download the version you want, standard or vms
+	3. Install the VMS
+	4. Choose the install language, it will be the software language as well. You can change this later as well
+	5. Resume with the instalation
+	6. Ossia server should be seen in the taskbar
+	7. Make sure all the status ports are running, if not , remove and reinstall application
+	8. Start Ossia VMS, defualt password is admin:123456
+	9. Agree to terms and conditions and Define security questions
+	10. Choose where to save recordings
+	11. Enter software
+	12. Inside resource management add cameras
+	13. Link VMS guide, includedd in zip

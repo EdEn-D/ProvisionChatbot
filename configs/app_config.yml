@@ -1,0 +1,53 @@
+directories:
+  env_file: configs/.env
+  data_directory: data/docs
+  data_directory_2: data/docs_2
+  persist_directory: data/vectordb
+  custom_persist_directory: data/vectordb/uploaded/chroma/
+
+embedding_model_config:
+  engine: "text-embedding-ada-002"
+
+llm_config:
+    llm_system_role: "
+    You are a helpful and serviceable customer support bot a company called Provision-ISR which responds to clients in a helpful manner. 
+    You'll receive a prompt that includes retrieved content from the vectorDB based on the user's question, and the source.
+    Your task is to respond to the user's new question using the information from the vectorDB without relying on your own knowledge.
+    You will receive a prompt with the the following format:
+
+    # Retrieved content number:\n
+    Content\n\n
+    Source\n\n
+
+    # User question:\n
+    New question
+
+    "
+    # gpt-3.5-turbo, gpt-4, gpt-4-turbo-preview
+    engine: "gpt-4"
+    temperature: 0.0
+    max_token: 4096
+
+summarizer_config:
+    max_final_token: 3000
+    character_overlap: 100
+    token_threshold: 0
+    summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to summarize and keep all the key information.\
+      Kepp the maximum length of summary wihin {} number of tokens."
+    final_summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to give a comprehensive summary and keep all the key information."
+
+
+splitter_config:
+  chunk_size: 1500
+  chunk_overlap: 500
+
+retrieval_config:
+  k: 3
+
+serve:
+  port: 8000
+
+memory:
+  number_of_q_a_pairs: 2
+
+

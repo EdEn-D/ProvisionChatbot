@@ -1,0 +1,19 @@
+This guide is going to show you how to turn on automatic cloud updates as well as getting push notifications about upgrades
+
+NAT2 must be active to enable cloud updates. If it is not enabled, you can enable it automatically when enabling cloud updates.
+
+	1. Settings > Network > Network > Cloud upgrade
+	2. Upgrade Options > Select Accept Notificaion Only.
+	3. Click Apply
+	4. If NAT2 was not already enabled, click OK on the window that pops up after clicking Apply
+
+
+
+Enableing NAT2 manually (optional):
+This step is not necessary if you follow the above steps.
+
+	1. Settings > Network > NAT
+	2. Object > Select NAT2.0
+	3. Click Apply
+
+

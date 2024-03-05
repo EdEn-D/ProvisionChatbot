@@ -1,0 +1,11 @@
+This guide will show you how to create additional users and permission groups.
+
+If you want to create a user with custom permissions you must first open a permission group.
+	1. Settings > Accounts and Permissions > Account > Edit Permission group
+	2. Here you can edit the current permission groups or create a new one. 
+	3. Choose the permissions for the group you are editing or adding
+	4. Account > Add user	
+	5. Enter username and password for the new account. 
+		a. Email is optional
+		b. Select desired permission group
+		c. Click ok
