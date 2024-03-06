@@ -34,7 +34,7 @@ def push_log():
     global log_row
     file_exists = os.path.isfile("AI_bot_log.csv")
 
-    with open("AI_bot_log.csv", mode='a', newline='') as file:
+    with open("AI_bot_log.csv", mode='a', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=log_row.keys())
 
         if not file_exists:
