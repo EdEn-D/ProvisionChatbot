@@ -1,9 +1,9 @@
 directories:
   env_file: configs/.env
-  data_directory: data/docs
-  data_directory_2: data/docs_2
+  data_directory_texts: data/docs/texts
+  data_directory_pdfs: data/docs/PDFs
   persist_directory: data/vectordb
-  custom_persist_directory: data/vectordb/uploaded/chroma/
+  # custom_persist_directory: data/vectordb/uploaded/chroma/
 
 embedding_model_config:
   engine: "text-embedding-ada-002"
@@ -28,13 +28,13 @@ llm_config:
     temperature: 0.0
     max_token: 4096
 
-summarizer_config:
-    max_final_token: 3000
-    character_overlap: 100
-    token_threshold: 0
-    summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to summarize and keep all the key information.\
-      Kepp the maximum length of summary wihin {} number of tokens."
-    final_summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to give a comprehensive summary and keep all the key information."
+#summarizer_config:
+#    max_final_token: 3000
+#    character_overlap: 100
+#    token_threshold: 0
+#    summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to summarize and keep all the key information.\
+#      Kepp the maximum length of summary wihin {} number of tokens."
+#    final_summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to give a comprehensive summary and keep all the key information."
 
 
 splitter_config:

@@ -1,6 +1,5 @@
 # my stuff
 data/vectorDB
-src/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
