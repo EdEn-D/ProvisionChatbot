@@ -49,10 +49,7 @@ async def waiting_for_question(message: Message, state:FSMContext):
 async def ask_question(message: Message, state:FSMContext):
     await message.answer("Asking question, please wait...")
     print(f"asking question: {message.text}")
-    loop = asyncio.get_running_loop()
-    response = await loop.run_in_executor(None, invoke_prompt, message.text)
-
-    # response = invoke_prompt(message.text)
+    response = await invoke_prompt(message.text)
     await state.set_state(Form.returning_response)
     await message.answer(text=response)
     await message.answer(text="Is this correct?")

@@ -13,7 +13,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 
-
+import asyncio
 
 import tiktoken
 load_dotenv(find_dotenv())
@@ -126,7 +126,7 @@ def get_embedded_data():
         ret_list = "These are the guides I know: \n\n" + ret_list
         return ret_list
 
-def invoke_prompt(question):
+async def invoke_prompt(question):
     # gpt-4, gpt-4-turbo-preview, gpt-3.5-turbo
     chat_3 = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0)
     chat_4 = ChatOpenAI(model_name='gpt-4', temperature=0)
@@ -172,8 +172,12 @@ def invoke_prompt(question):
     New question
 
     '''
-    response = chat_4t.invoke(llm_system_role + prompt).content
+    response = await chat_4t.ainvoke(llm_system_role + prompt)
 
-    return response
-
-#print(invoke_prompt("How do I add a camera to the NVR?"))
+    return response.content
+# async def main():
+#     response = await invoke_prompt("How do I add a camera to the NVR?")
+#     print(response)
+#
+# if __name__ == "__main__":
+#     asyncio.run(main())
