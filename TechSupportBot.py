@@ -25,6 +25,7 @@ def sim_msg():
     time.sleep(2)  # Sleep for 2 seconds to simulate a delay
     return "Result from bot"
 
+# TODO: watch async video for scalability
 
 def create_documents_from_txt_guides(directory_path):
     '''

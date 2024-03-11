@@ -13,12 +13,16 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
-dp = Dispatcher()
-# router = Router
+router = Router()
 
-async def sim_msg():
-    await asyncio.sleep(4)
-    return "Result from bot - 4 sec"
+# TODO: Restructure bot code
+
+# Flow:
+# 1. Start -> get buttons, ask Q, get data
+# 2.1 Get data -> Print trained data
+# 2.2 Ask Q -> Waiting for question
+# 3 Waiting for response
+
 
 # Helper function to send buttons
 def send_buttons(buttons: list[str]) -> ReplyKeyboardMarkup:
@@ -33,32 +37,47 @@ def get_keyboard():
     builder.button(text="Get training data")
     builder.adjust(2)
 
-@dp.message(CommandStart())
+@router.message(CommandStart())
 async def cmd_start(message: Message) -> None:
-    await message.answer(text="> Ask the AI questions useing the /ask command then rate the response for training\n"
-                          "> Use /getdata command to see which data I am trained on",
+    await message.answer(text="> Ask the AI questions using the buttons below\n"
+                          "> Get the data to see which data I am trained on",
                      reply_markup=send_buttons(["Ask a question", "Get Training Data"])
                      )
 
-@dp.message(F.text == "Ask a question")
-async def waiting_for_question(message: Message, state:FSMContext):
-    await message.answer("Please ask your question: ")
-    await state.set_state(Form.awaiting_query)
+@router.message(Command("Get Training Data"))
+async def get_data(message: Message, state: FSMContext):
+    await message.answer(text="Printing data...")
+    print("Printing data...")
 
-@dp.message(Form.awaiting_query)
+@router.message(F.text == "Ask a question")
 async def ask_question(message: Message, state:FSMContext):
+    await message.answer("Please ask your question: ")
+    await state.set_state(Form.return_response)
+
+@router.message(Form.return_response)
+async def ask_rating(message: Message, state:FSMContext):
     await message.answer("Asking question, please wait...")
     print(f"asking question: {message.text}")
     response = await invoke_prompt(message.text)
-    await state.set_state(Form.returning_response)
     await message.answer(text=response)
-    await message.answer(text="Is this correct?")
+    await message.answer(text="Is this correct?",
+                         reply_markup=send_buttons(["Correct", "Incorrect"])
+                         )
+    await state.set_state(Form.rating)
+
+@router.message(Form.rating)
+async def ask_comments(message: Message, state: FSMContext):
+    # save messsage.text
+    await state.set_state(Form.comments)
+    await message.answer("Thanks, any comments?")
 
 
-@dp.message(Command("Get Training Data"))
-async def get_data(message: Message, state:FSMContext):
-    await message.answer(text="Printing data...")
-    print("Printing data...")
+@router.message(Form.comments)
+async def final_message(message: Message, state: FSMContext):
+    # save messsage.text
+    await state.clear()
+    await message.answer("Thank you for your feedback! Feel free to ask me some more questions!")
+    await cmd_start(message)
 
 
 async def ask_ai_and_log(message: Message, state: FSMContext):
@@ -71,6 +90,8 @@ async def ask_ai_and_log(message: Message, state: FSMContext):
 
 async def main() -> None:
     bot = Bot(TELEGRAM_BOT_TOKEN)
+    dp = Dispatcher()
+    dp.include_router(router)
 
     await dp.start_polling(bot)
 

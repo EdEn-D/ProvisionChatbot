@@ -1,8 +1,7 @@
 from aiogram.fsm.state import StatesGroup, State
 
 class Form(StatesGroup):
-    awaiting_query = State()
-    returning_response = State()
+    return_response = State()
     rating = State()
-    notes = State()
+    comments = State()
 
