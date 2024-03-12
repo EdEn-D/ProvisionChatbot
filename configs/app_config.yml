@@ -3,6 +3,9 @@ directories:
   data_directory_texts: data/docs/texts
   data_directory_pdfs: data/docs/PDFs
   persist_directory: data/vectordb
+
+logs:
+  log_file: data/logs/log.csv
   # custom_persist_directory: data/vectordb/uploaded/chroma/
 
 embedding_model_config:
@@ -49,5 +52,7 @@ serve:
 
 memory:
   number_of_q_a_pairs: 2
+
+
 
 

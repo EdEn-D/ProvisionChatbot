@@ -7,12 +7,13 @@ from aiogram.fsm.context import FSMContext
 
 from states import Form
 from TechSupportBot import invoke_prompt
+from src.utils.df_logger import Logger
 
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-
+logger = Logger()
 router = Router()
 
 # TODO: Restructure bot code
@@ -51,15 +52,19 @@ async def get_data(message: Message, state: FSMContext):
 
 @router.message(F.text == "Ask a question")
 async def ask_question(message: Message, state:FSMContext):
-    await message.answer("Please ask your question: ")
+    await message.answer(f"Hello {message.from_user.first_name}!\n"
+                         f"Please ask your question: ")
+    logger.set_user(message.from_user.first_name)
     await state.set_state(Form.return_response)
 
 @router.message(Form.return_response)
 async def ask_rating(message: Message, state:FSMContext):
     await message.answer("Asking question, please wait...")
     print(f"asking question: {message.text}")
+    logger.set_query(message.text)
     response = await invoke_prompt(message.text)
     await message.answer(text=response)
+    logger.set_response(response)
     await message.answer(text="Is this correct?",
                          reply_markup=send_buttons(["Correct", "Incorrect"])
                          )
@@ -67,14 +72,16 @@ async def ask_rating(message: Message, state:FSMContext):
 
 @router.message(Form.rating)
 async def ask_comments(message: Message, state: FSMContext):
-    # save messsage.text
+    logger.set_rating(message.text)
     await state.set_state(Form.comments)
     await message.answer("Thanks, any comments?")
 
 
 @router.message(Form.comments)
 async def final_message(message: Message, state: FSMContext):
-    # save messsage.text
+    logger.set_comments(message.text)
+    logger.print_df()
+    logger.commit_log_entry()
     await state.clear()
     await message.answer("Thank you for your feedback! Feel free to ask me some more questions!")
     await cmd_start(message)

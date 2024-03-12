@@ -66,6 +66,9 @@ class LoadConfig:
         with open(here("configs/app_config.yml")) as cfg:
             app_config = yaml.load(cfg, Loader=yaml.FullLoader)
 
+        # Log configs
+        self.log_file = app_config["logs"]["log_file"]
+
         # LLM configs
         self.llm_engine = app_config["llm_config"]["engine"]
         self.llm_system_role = app_config["llm_config"]["llm_system_role"]
