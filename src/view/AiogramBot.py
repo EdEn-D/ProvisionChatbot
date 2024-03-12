@@ -25,6 +25,13 @@ router = Router()
 # 2.2 Ask Q -> Waiting for question
 # 3 Waiting for response
 
+async def parse_docs(docs) -> str:
+    ret = ""
+    for i, doc in enumerate(docs):
+        ret += f"Doc #{i}: {doc.metadata}\n"
+
+    return ret
+
 
 # Helper function to send buttons
 def send_buttons(buttons: list[str]) -> ReplyKeyboardMarkup:
@@ -53,7 +60,7 @@ async def get_data(message: Message, state: FSMContext):
 
 @router.message(F.text == "Ask a question")
 async def ask_question(message: Message, state:FSMContext):
-    loggers[message.from_user.id] = Logger(message.from_user.first_name)
+    loggers[message.from_user.id] = Logger()
     await message.answer(f"Hello {message.from_user.first_name}!\n"
                          f"Please ask your question: ")
     await loggers[message.from_user.id].set_user(message.from_user.first_name)
@@ -64,8 +71,11 @@ async def ask_rating(message: Message, state:FSMContext):
     await message.answer("Asking question, please wait...")
     print(f"asking question: {message.text}")
     await loggers[message.from_user.id].set_query(message.text)
-    response = await invoke_prompt(message.text)
+    response_docs = await invoke_prompt(message.text)
+    response = response_docs[0]
+    docs = await parse_docs(response_docs[1])
     await message.answer(text=response)
+    await message.answer(text=docs)
     await loggers[message.from_user.id].set_response(response)
     await message.answer(text="Is this correct?",
                          reply_markup=send_buttons(["Correct", "Incorrect"])
@@ -87,14 +97,6 @@ async def final_message(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("Thank you for your feedback! Feel free to ask me some more questions!")
     await cmd_start(message)
-
-
-async def ask_ai_and_log(message: Message, state: FSMContext):
-    response = invoke_prompt(message.text)
-    await response
-    print(response)
-
-
 
 
 async def main() -> None:

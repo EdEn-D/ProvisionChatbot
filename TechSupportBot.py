@@ -175,7 +175,7 @@ async def invoke_prompt(question):
     '''
     response = await chat_4t.ainvoke(llm_system_role + prompt)
 
-    return response.content
+    return response.content, docs
 # async def main():
 #     response = await invoke_prompt("How do I add a camera to the NVR?")
 #     print(response)
