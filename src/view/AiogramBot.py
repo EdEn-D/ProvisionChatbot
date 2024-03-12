@@ -13,7 +13,8 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-logger = Logger()
+# logger = Logger()
+loggers = {}  # Dictionary to hold Logger instances by chat_id
 router = Router()
 
 # TODO: Restructure bot code
@@ -52,19 +53,20 @@ async def get_data(message: Message, state: FSMContext):
 
 @router.message(F.text == "Ask a question")
 async def ask_question(message: Message, state:FSMContext):
+    loggers[message.from_user.id] = Logger(message.from_user.first_name)
     await message.answer(f"Hello {message.from_user.first_name}!\n"
                          f"Please ask your question: ")
-    logger.set_user(message.from_user.first_name)
+    await loggers[message.from_user.id].set_user(message.from_user.first_name)
     await state.set_state(Form.return_response)
 
 @router.message(Form.return_response)
 async def ask_rating(message: Message, state:FSMContext):
     await message.answer("Asking question, please wait...")
     print(f"asking question: {message.text}")
-    logger.set_query(message.text)
+    await loggers[message.from_user.id].set_query(message.text)
     response = await invoke_prompt(message.text)
     await message.answer(text=response)
-    logger.set_response(response)
+    await loggers[message.from_user.id].set_response(response)
     await message.answer(text="Is this correct?",
                          reply_markup=send_buttons(["Correct", "Incorrect"])
                          )
@@ -72,16 +74,16 @@ async def ask_rating(message: Message, state:FSMContext):
 
 @router.message(Form.rating)
 async def ask_comments(message: Message, state: FSMContext):
-    logger.set_rating(message.text)
+    await loggers[message.from_user.id].set_rating(message.text)
     await state.set_state(Form.comments)
     await message.answer("Thanks, any comments?")
 
 
 @router.message(Form.comments)
 async def final_message(message: Message, state: FSMContext):
-    logger.set_comments(message.text)
-    logger.print_df()
-    logger.commit_log_entry()
+    await loggers[message.from_user.id].set_comments(message.text)
+    await loggers[message.from_user.id].print_df()
+    await loggers[message.from_user.id].commit_log_entry()
     await state.clear()
     await message.answer("Thank you for your feedback! Feel free to ask me some more questions!")
     await cmd_start(message)
