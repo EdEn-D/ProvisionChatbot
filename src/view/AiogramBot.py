@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 
 from states import Form
-from TechSupportBot import invoke_prompt
+from TechSupportBot import invoke_prompt, get_embedded_data, prepare_documents
 from src.utils.df_logger import Logger
 
 from dotenv import load_dotenv, find_dotenv
@@ -39,12 +39,6 @@ def send_buttons(buttons: list[str]) -> ReplyKeyboardMarkup:
     [builder.button(text=txt) for txt in buttons]
     return builder.as_markup(resize_keyboard=True, input_field_placeholder="Select action", one_time_keyboard=True, is_persistent=True)
 
-def get_keyboard():
-
-    builder = ReplyKeyboardBuilder()
-    builder.button(text="Ask a question", callback_data=print("test"))
-    builder.button(text="Get training data")
-    builder.adjust(2)
 
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> None:
@@ -53,10 +47,9 @@ async def cmd_start(message: Message) -> None:
                      reply_markup=send_buttons(["Ask a question", "Get Training Data"])
                      )
 
-@router.message(Command("Get Training Data"))
+@router.message(F.text == "Get Training Data")
 async def get_data(message: Message, state: FSMContext):
-    await message.answer(text="Printing data...")
-    print("Printing data...")
+    await message.answer(text=get_embedded_data())
 
 @router.message(F.text == "Ask a question")
 async def ask_question(message: Message, state:FSMContext):
@@ -100,6 +93,7 @@ async def final_message(message: Message, state: FSMContext):
 
 
 async def main() -> None:
+    prepare_documents()
     bot = Bot(TELEGRAM_BOT_TOKEN)
     dp = Dispatcher()
     dp.include_router(router)

@@ -159,3 +159,4 @@ cython_debug/
 AI_bot_log.csv
 .idea/ProvisionChatbot.iml
 src/view/chatbot.py
+/data/Provision.zip

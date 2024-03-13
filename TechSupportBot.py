@@ -12,14 +12,26 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
-
+from src.utils.load_config import LoadConfig
+from src.utils.prepare_vectordb import PrepareVectorDB
 import asyncio
-
 import tiktoken
 load_dotenv(find_dotenv())
 
+app_config = LoadConfig()
 persist_directory = 'data/vectorDB/TechSupportBotDB'
-
+vectorDB = None
+def prepare_documents():
+    global vectorDB
+    prepare_DB = PrepareVectorDB(
+        data_directory_pdfs=app_config.data_directory_pdfs,
+        data_directory_texts=app_config.data_directory_texts,
+        persist_directory=app_config.persist_directory,
+        embedding_model_engine=app_config.embedding_model_engine,
+        chunk_size=app_config.chunk_size,
+        chunk_overlap=app_config.chunk_overlap,
+    )
+    vectorDB = prepare_DB.prepare_and_save_vectordb()
 
 def sim_msg():
     time.sleep(2)  # Sleep for 2 seconds to simulate a delay
@@ -113,12 +125,11 @@ def process_pdfs(data_directory):
     return chunked_documents
 
 def get_embedded_data():
-    if not os.path.exists(persist_directory):
+    if not os.path.exists(app_config.persist_directory):
         return "Not initialized"
     else:
-        vectordb = Chroma(persist_directory=persist_directory, embedding_function=OpenAIEmbeddings())
         doc_set = set()
-        for doc in vectordb.get()["metadatas"]:
+        for doc in vectorDB.get()["metadatas"]:
             doc_set.add(os.path.basename(str(doc['source'])))
         ret_list = ''
         for i, doc in enumerate(doc_set):
@@ -133,23 +144,7 @@ async def invoke_prompt(question):
     chat_4 = ChatOpenAI(model_name='gpt-4', temperature=0)
     chat_4t = ChatOpenAI(model_name='gpt-4-turbo-preview', temperature=0)
 
-    if not os.path.exists(persist_directory):
-        # Creating Documents and embedding them
-        txt_documents = create_documents_from_txt_guides('data/docs/texts')
-        pdf_documents = process_pdfs("data/docs/PDFs")
-        documents = txt_documents + pdf_documents
-
-        vectordb = Chroma.from_documents(
-            documents=documents,
-            embedding=OpenAIEmbeddings(),
-            persist_directory=persist_directory
-        )
-        print("db created")
-    else:
-        vectordb = Chroma(persist_directory=persist_directory, embedding_function=OpenAIEmbeddings())
-        print("db loaded")
-
-    retriever = vectordb.as_retriever(search_kwargs={"k": 4})  # default 4
+    retriever = vectorDB.as_retriever(search_kwargs={"k": 4})  # default 4
     # retriever = vectordb.as_retriever()
     # question = "How do I update my NVR?"
     docs = retriever.get_relevant_documents(question)

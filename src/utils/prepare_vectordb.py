@@ -164,6 +164,9 @@ class PrepareVectorDB:
         Returns:
             Chroma: The created VectorDB.
         """
+        if os.path.exists(self.persist_directory):
+            print("Vector DB already initialized")
+            return Chroma(persist_directory=self.persist_directory)
         docs_texts = self.__load_all_texts()
         docs_pdfs = self.__load_all_pdfs()
         chunked_pdf_documents = self.__chunk_documents(docs_pdfs)
