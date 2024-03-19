@@ -10,17 +10,6 @@ from langchain.schema import Document
 class PrepareVectorDB:
     """
     TODO: Rewrite this comment
-    A class for preparing and saving a VectorDB using OpenAI embeddings.
-
-    This class facilitates the process of loading documents, chunking them, and creating a VectorDB
-    with OpenAI embeddings. It provides methods to prepare and save the VectorDB.
-
-    Parameters:
-        data_directory (str or List[str]): The directory or list of directories containing the documents.
-        persist_directory (str): The directory to save the VectorDB.
-        embedding_model_engine (str): The engine for OpenAI embeddings.
-        chunk_size (int): The size of the chunks for document processing.
-        chunk_overlap (int): The overlap between chunks.
     """
 
     def __init__(
@@ -32,17 +21,6 @@ class PrepareVectorDB:
             chunk_size: int,
             chunk_overlap: int
     ) -> None:
-        """
-        Initialize the PrepareVectorDB instance.
-
-        Parameters:
-            data_directory (str or List[str]): The directory or list of directories containing the documents.
-            persist_directory (str): The directory to save the VectorDB.
-            embedding_model_engine (str): The engine for OpenAI embeddings.
-            chunk_size (int): The size of the chunks for document processing.
-            chunk_overlap (int): The overlap between chunks.
-
-        """
 
         self.embedding_model_engine = embedding_model_engine
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -164,14 +142,15 @@ class PrepareVectorDB:
         Returns:
             Chroma: The created VectorDB.
         """
-        if os.path.exists(self.persist_directory):
-            print("Vector DB already initialized")
-            return Chroma(persist_directory=self.persist_directory)
+        # Todo: Fix this part, missing embedding model when loaded DB from persist directory
+        # if os.path.exists(self.persist_directory):
+        #     print("Vector DB already initialized")
+        #     return Chroma(persist_directory=self.persist_directory)
+        print("Preparing vectordb...")
         docs_texts = self.__load_all_texts()
         docs_pdfs = self.__load_all_pdfs()
         chunked_pdf_documents = self.__chunk_documents(docs_pdfs)
         documents = chunked_pdf_documents + docs_texts
-        print("Preparing vectordb...")
         vectordb = Chroma.from_documents(
             documents=documents,
             embedding=self.embedding,
