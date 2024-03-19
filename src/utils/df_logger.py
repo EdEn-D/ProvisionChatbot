@@ -12,7 +12,7 @@ class Logger:
         self.log_df = pd.DataFrame(columns=['Date', 'Time', 'User', 'Query', 'Response', 'Rating', 'Comments'])
         # Initialize a temporary storage for the current log entry
         self.current_entry = {key: None for key in self.log_df.columns}
-        self.log_file_dir = app_config.log_file
+        self.log_file_path = app_config.log_file
         self.lock = Lock()
 
     async def _update_current_entry(self, key, value):
@@ -59,7 +59,16 @@ class Logger:
         async with self.lock:
             """Save the log DataFrame to a CSV file, appending if the file already exists."""
             # Check if the file exists to determine if we need to write headers
-            file_exists = os.path.isfile(app_config.log_file)
+            file_exists = os.path.isfile(self.log_file_path)
+
+            # Extract the directory path
+            directory_path = os.path.dirname(self.log_file_path)
+
+            # Check if the directory path exists
+            if not os.path.exists(directory_path):
+                # If the directory does not exist, create it
+                os.makedirs(directory_path)
+                print("Directory created:", directory_path)
 
             entry_df = pd.DataFrame([self.current_entry])
             self.log_df = pd.concat([self.log_df, entry_df], ignore_index=True)
@@ -67,7 +76,7 @@ class Logger:
             loop = get_running_loop()
             await loop.run_in_executor(
                 None,  # Executor, None uses the default executor (ThreadPoolExecutor)
-                lambda: self.log_df.to_csv(app_config.log_file, mode='a', index=False, header=not file_exists)
+                lambda: self.log_df.to_csv(self.log_file_path, mode='a', index=False, header=not file_exists)
             )
 
             # Clear the DataFrame after saving to avoid appending the same logs again on subsequent saves
